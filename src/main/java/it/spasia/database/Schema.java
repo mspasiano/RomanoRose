@@ -132,7 +132,7 @@ public class Schema {
         db.execSQL(QUERY_TABLE_GROUP_CREATE);
         //TEST EXAMPLE INSERT
         DAOCard daoCard = new DAOCard(db);
-        daoCard.insert("SERRA 1", "HL00023146", "serraA1", 30,
+        daoCard.insert("SERRA 1", "******", "*******", 30,
                 null,null,null,null,
                 null,null,null,null,
                 null,null,null,null,
