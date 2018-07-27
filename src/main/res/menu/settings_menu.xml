@@ -1,0 +1,24 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="it.spasia.activity.Settings">
+    <item
+        android:id="@+id/action_export_db"
+        android:icon="@drawable/ic_icon_upload_db"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_export_db" />
+    <item
+        android:id="@+id/action_import_db"
+        android:icon="@drawable/ic_icon_download_db"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_import_db" />
+
+    <item
+        android:id="@+id/action_add_card"
+        android:icon="@drawable/ic_icon_add_card"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_add" />
+</menu>
