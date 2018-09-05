@@ -77,6 +77,8 @@ public class Schema {
     public static final String COLUMN_RELE_16 = "rele_16";
     public static final int COLUMN_RELE_16_ID = 20;
 
+    public static final String COLUMN_NOTE = "note";
+    public static final int COLUMN_NOTE_ID = 21;
     /**
      * Group column
      */
@@ -112,7 +114,8 @@ public class Schema {
                     + COLUMN_RELE_13 + " TEXT,"
                     + COLUMN_RELE_14 + " TEXT,"
                     + COLUMN_RELE_15 + " TEXT,"
-                    + COLUMN_RELE_16 + " TEXT"
+                    + COLUMN_RELE_16 + " TEXT,"
+                    + COLUMN_NOTE + " TEXT"
                     + ");";
 
     private static final String QUERY_TABLE_GROUP_CREATE =
@@ -132,7 +135,7 @@ public class Schema {
         db.execSQL(QUERY_TABLE_GROUP_CREATE);
         //TEST EXAMPLE INSERT
         DAOCard daoCard = new DAOCard(db);
-        daoCard.insert("SERRA 1", "******", "*******", 30,
+        daoCard.insert("SERRA 1", "******", "*******", 30, "",
                 null,null,null,null,
                 null,null,null,null,
                 null,null,null,null,

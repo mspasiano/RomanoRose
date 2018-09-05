@@ -19,6 +19,9 @@
             android:inputType="number"
             android:key="@string/card_timeout"
             android:title="@string/card_timeout"></EditTextPreference>
+        <EditTextPreference
+            android:key="@string/card_note"
+            android:title="@string/card_note"></EditTextPreference>
     </PreferenceCategory>
     <PreferenceCategory
         android:key="@string/card_rele"

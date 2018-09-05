@@ -1,21 +1,33 @@
 package it.spasia.fragment;
 
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.preference.EditTextPreference;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.NestedScrollView;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.vveye.T2u;
@@ -29,6 +41,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.spasia.R;
+import it.spasia.dao.DAOCard;
+import it.spasia.database.Database;
 import it.spasia.model.Card;
 import it.spasia.util.PortStatusTask;
 
@@ -42,11 +56,16 @@ public class CardFragment extends android.support.v4.app.Fragment {
     private Card card;
     private List<Switch> switches = new ArrayList<Switch>();
     private LinearLayout linearLayoutMain;
+    private ProgressDialog progressDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         this.card = (Card) getArguments().getSerializable("card");
         this.remotePort = (char) (8080);
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setMessage("Connessione in corso...");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
         super.onCreate(savedInstanceState);
     }
 
@@ -59,16 +78,47 @@ public class CardFragment extends android.support.v4.app.Fragment {
         linearLayoutMain.setOrientation(LinearLayout.VERTICAL);
         nestedScrollView.addView(linearLayoutMain);
 
-        Switch timeoutSwitch = new Switch(getActivity());
-        timeoutSwitch.setText("Temporizzatore " + card.getTimeout() + " secondi..");
-        timeoutSwitch.setChecked(true);
-        timeoutSwitch.setId(R.id.timeout_switch);
-        linearLayoutMain.addView(timeoutSwitch);
 
         TableLayout tableLayout = new TableLayout(getActivity());
         tableLayout.setStretchAllColumns(true);
         tableLayout.setShrinkAllColumns(true);
         linearLayoutMain.addView(tableLayout);
+
+        View tableRowTimeout = inflater.inflate(R.layout.timeout, null);
+        EditText editText = tableRowTimeout.findViewById(R.id.editTextTimeout);
+        editText.setText(String.valueOf(card.getTimeout()));
+        editText.setSelection(String.valueOf(card.getTimeout()).length());
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                final String s1 = editText.getText().toString();
+                if (s1 != null && s1.length() > 0) {
+                    Log.i("Temporizzatore:", s1);
+                    Database db = Database.create(getActivity().getApplicationContext());
+                    DAOCard daoCard = new DAOCard(db.open());
+                    card.setTimeout(new Integer(s1));
+                    daoCard.update(card);
+                }
+            }
+        });
+
+        Switch aSwitch = tableRowTimeout.findViewById(R.id.timeout_switch);
+        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                editText.setEnabled(isChecked);
+            }
+        });
+        tableLayout.addView(tableRowTimeout);
+
 
         TableRow tableRowButtons = createTableRow(tableLayout);
         Button buttonConnect = new Button(getActivity());
@@ -78,13 +128,19 @@ public class CardFragment extends android.support.v4.app.Fragment {
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (connect()) {
-                    v.setEnabled(false);
-                    linearLayoutMain.findViewById(R.id.disconnect).setEnabled(true);
-                    for (Switch window : switches) {
-                        window.setEnabled(true);
+                progressDialog.show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (connect()) {
+                            v.setEnabled(false);
+                            linearLayoutMain.findViewById(R.id.disconnect).setEnabled(true);
+                            for (Switch window : switches) {
+                                window.setEnabled(true);
+                            }
+                        }
                     }
-                }
+                }, 100);
             }
         });
         tableRowButtons.addView(buttonConnect);
@@ -260,7 +316,7 @@ public class CardFragment extends android.support.v4.app.Fragment {
     }
 
     public boolean connect() {
-        Log.d("T2u", "Demo for T2u!");
+        Log.d("T2u", "Start connect for T2u!");
         T2u.Init("nat.vveye.net", (char) 8000, "");
         byte[] result = new byte[1500];
         int num = T2u.Search(result);
@@ -312,7 +368,6 @@ public class CardFragment extends android.support.v4.app.Fragment {
                 Log.e("T2u", "PortStatusTask portstatus:" + portstatus, e);
             }
         }
-
         if (portstatus == 1) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                     .permitAll().build();
@@ -324,11 +379,18 @@ public class CardFragment extends android.support.v4.app.Fragment {
                 Log.e("T2u", "Socket Exception", e);
             }
             Toast.makeText(this.getActivity(), "Dispositivo collegato!", Toast.LENGTH_LONG).show();
+            progressDialog.dismiss();
             return true;
         } else if (portstatus == -5) {
+            progressDialog.dismiss();
             Toast.makeText(this.getActivity(), "Password errata riprovare!", Toast.LENGTH_SHORT).show();
         } else if (portstatus == -1) {
+            progressDialog.dismiss();
             Toast.makeText(this.getActivity(), "Dispositivo non trovato!", Toast.LENGTH_SHORT).show();
+        } else if (portstatus == -2) {
+            return connect();
+        } else {
+            Toast.makeText(this.getActivity(), "Errore non previsto codice: " + portstatus, Toast.LENGTH_SHORT).show();
         }
         return false;
     }

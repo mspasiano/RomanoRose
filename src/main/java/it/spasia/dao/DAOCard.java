@@ -15,12 +15,12 @@ public class DAOCard extends AbstractDAO<Card> implements DAO<Card> {
         super(db);
     }
 
-    public long insert(String name, String uid, String password, Integer timeout,
+    public long insert(String name, String uid, String password, Integer timeout, String note,
                        String rele_1, String rele_2, String rele_3, String rele_4,
                        String rele_5, String rele_6, String rele_7, String rele_8,
                        String rele_9, String rele_10, String rele_11, String rele_12,
                        String rele_13, String rele_14, String rele_15, String rele_16) {
-        ContentValues insertValues = createContentValues(name, uid, password, timeout,
+        ContentValues insertValues = createContentValues(name, uid, password, timeout, note,
                 rele_1, rele_2, rele_3, rele_4,
                 rele_5, rele_6, rele_7, rele_8,
                 rele_9, rele_10, rele_11, rele_12,
@@ -28,12 +28,12 @@ public class DAOCard extends AbstractDAO<Card> implements DAO<Card> {
         return db.insert(Schema.TABLENAME_CARD, null, insertValues);
     }
 
-    public boolean update(long id, String name, String uid, String password, Integer timeout,
+    public boolean update(long id, String name, String uid, String password, Integer timeout, String note,
                           String rele_1, String rele_2, String rele_3, String rele_4,
                           String rele_5, String rele_6, String rele_7, String rele_8,
                           String rele_9, String rele_10, String rele_11, String rele_12,
                           String rele_13, String rele_14, String rele_15, String rele_16) {
-        return db.update(Schema.TABLENAME_CARD, createContentValues(name, uid, password, timeout,
+        return db.update(Schema.TABLENAME_CARD, createContentValues(name, uid, password, timeout, note,
                 rele_1, rele_2, rele_3, rele_4,
                 rele_5, rele_6, rele_7, rele_8,
                 rele_9, rele_10, rele_11, rele_12,
@@ -64,7 +64,8 @@ public class DAOCard extends AbstractDAO<Card> implements DAO<Card> {
                         Schema.COLUMN_RELE_13,
                         Schema.COLUMN_RELE_14,
                         Schema.COLUMN_RELE_15,
-                        Schema.COLUMN_RELE_16
+                        Schema.COLUMN_RELE_16,
+                        Schema.COLUMN_NOTE
                 }, null, null, null, null,
                 null);
         return cursorToServers(c);
@@ -81,7 +82,7 @@ public class DAOCard extends AbstractDAO<Card> implements DAO<Card> {
         return cursorToServer(c);
     }
 
-    private ContentValues createContentValues(String name, String uid, String password, Integer timeout,
+    private ContentValues createContentValues(String name, String uid, String password, Integer timeout, String note,
                                               String rele_1, String rele_2, String rele_3, String rele_4,
                                               String rele_5, String rele_6, String rele_7, String rele_8,
                                               String rele_9, String rele_10, String rele_11, String rele_12,
@@ -92,6 +93,7 @@ public class DAOCard extends AbstractDAO<Card> implements DAO<Card> {
         updateValues.put(Schema.COLUMN_UID, uid);
         updateValues.put(Schema.COLUMN_PASSWORD, password);
         updateValues.put(Schema.COLUMN_TIMEOUT, timeout);
+        updateValues.put(Schema.COLUMN_NOTE, note);
 
         updateValues.put(Schema.COLUMN_RELE_1, rele_1);
         updateValues.put(Schema.COLUMN_RELE_2, rele_2);
@@ -114,7 +116,7 @@ public class DAOCard extends AbstractDAO<Card> implements DAO<Card> {
     }
 
     public boolean update(Card card) {
-        return update(card.getId(), card.getName(), card.getUid(), card.getPassword(), card.getTimeout(),
+        return update(card.getId(), card.getName(), card.getUid(), card.getPassword(), card.getTimeout(), card.getNote(),
                 card.getRele_1(), card.getRele_2(), card.getRele_3(), card.getRele_4(),
                 card.getRele_5(), card.getRele_6(), card.getRele_7(), card.getRele_8(),
                 card.getRele_9(), card.getRele_10(), card.getRele_11(), card.getRele_12(),
@@ -122,7 +124,7 @@ public class DAOCard extends AbstractDAO<Card> implements DAO<Card> {
     }
 
     public long insert(Card card) {
-        return insert(card.getName(), card.getUid(), card.getPassword(), card.getTimeout(),
+        return insert(card.getName(), card.getUid(), card.getPassword(), card.getTimeout(), card.getNote(),
                 card.getRele_1(), card.getRele_2(), card.getRele_3(), card.getRele_4(),
                 card.getRele_5(), card.getRele_6(), card.getRele_7(), card.getRele_8(),
                 card.getRele_9(), card.getRele_10(), card.getRele_11(), card.getRele_12(),
@@ -140,6 +142,7 @@ public class DAOCard extends AbstractDAO<Card> implements DAO<Card> {
                 c.getString(Schema.COLUMN_UID_ID),
                 c.getString(Schema.COLUMN_PASSWORD_ID),
                 c.getInt(Schema.COLUMN_TIMEOUT_ID),
+                c.getString(Schema.COLUMN_NOTE_ID),
                 c.getString(Schema.COLUMN_RELE_1_ID),
                 c.getString(Schema.COLUMN_RELE_2_ID),
                 c.getString(Schema.COLUMN_RELE_3_ID),

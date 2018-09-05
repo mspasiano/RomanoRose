@@ -63,6 +63,7 @@ public class SettingsCard extends PreferenceActivity {
                 card.setUid(preference.get(R.string.card_uid).getText());
                 card.setPassword(preference.get(R.string.card_password).getText());
                 card.setTimeout(Integer.valueOf(preference.get(R.string.card_timeout).getText()));
+                card.setNote(preference.get(R.string.card_note).getText());
                 card.setRele_1(preference.get(R.string.card_rele_1).getText());
                 card.setRele_2(preference.get(R.string.card_rele_2).getText());
                 card.setRele_3(preference.get(R.string.card_rele_3).getText());
@@ -121,6 +122,7 @@ public class SettingsCard extends PreferenceActivity {
         result.put(R.string.card_uid, (EditTextPreference) preferenceFragment.findPreference(getResources().getString(R.string.card_uid)));
         result.put(R.string.card_password, (EditTextPreference) preferenceFragment.findPreference(getResources().getString(R.string.card_password)));
         result.put(R.string.card_timeout, (EditTextPreference) preferenceFragment.findPreference(getResources().getString(R.string.card_timeout)));
+        result.put(R.string.card_note, (EditTextPreference) preferenceFragment.findPreference(getResources().getString(R.string.card_note)));
 
         result.put(R.string.card_rele_1, (EditTextPreference) preferenceFragment.findPreference(getResources().getString(R.string.card_rele_1)));
         result.put(R.string.card_rele_2, (EditTextPreference) preferenceFragment.findPreference(getResources().getString(R.string.card_rele_2)));
@@ -164,6 +166,7 @@ public class SettingsCard extends PreferenceActivity {
                 preference.get(R.string.card_name).setSummary(activity.getCard().getName());
                 preference.get(R.string.card_uid).setText(activity.getCard().getUid());
                 preference.get(R.string.card_uid).setSummary(activity.getCard().getUid());
+                preference.get(R.string.card_note).setSummary(activity.getCard().getNote());
                 preference.get(R.string.card_password).setText(activity.getCard().getPassword());
                 preference.get(R.string.card_timeout).setText(String.valueOf(activity.getCard().getTimeout()));
                 preference.get(R.string.card_timeout).setSummary(String.valueOf(activity.getCard().getTimeout()));
@@ -238,6 +241,7 @@ public class SettingsCard extends PreferenceActivity {
             preference.get(R.string.card_name).setOnPreferenceChangeListener(preferenceChangeListener);
             preference.get(R.string.card_uid).setOnPreferenceChangeListener(preferenceChangeListener);
             preference.get(R.string.card_timeout).setOnPreferenceChangeListener(preferenceChangeListener);
+            preference.get(R.string.card_note).setOnPreferenceChangeListener(preferenceChangeListener);
 
             preference.get(R.string.card_rele_1).setOnPreferenceChangeListener(preferenceChangeListener);
             preference.get(R.string.card_rele_2).setOnPreferenceChangeListener(preferenceChangeListener);

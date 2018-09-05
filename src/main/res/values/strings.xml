@@ -32,7 +32,7 @@
     <string name="card_uid">Uid</string>
     <string name="card_password">Password</string>
     <string name="card_timeout">Temporizzatore</string>
-
+    <string name="card_note">Note</string>
 
     <string name="card_generali">Generali</string>
     <string name="card_rele">Rinomina Relè</string>

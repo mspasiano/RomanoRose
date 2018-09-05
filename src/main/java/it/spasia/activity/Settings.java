@@ -1,12 +1,15 @@
 package it.spasia.activity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
@@ -20,6 +23,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
 import it.spasia.R;
@@ -29,6 +33,8 @@ import it.spasia.model.Card;
 
 public class Settings extends PreferenceActivity {
     MyPreferenceFragment myPreferenceFragment;
+    private static final int WRITE_REQUEST_CODE = 43;
+    private static final int READ_REQUEST_CODE = 42;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -48,30 +54,66 @@ public class Settings extends PreferenceActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         setResult(RESULT_OK, new Intent());
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == WRITE_REQUEST_CODE) {
+                try {
+                    Uri data1 = data.getData();
+                    File dataDirectory = Environment.getDataDirectory();
+                    String  currentDBPath= "//data//" + "it.spasia" + "//databases//" + Database.DATABASE_NAME;
+                    File currentDB = new File(dataDirectory, currentDBPath);
+                    ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(data.getData(), "w");
+
+                    FileChannel src = new FileInputStream(currentDB).getChannel();
+                    FileChannel dst = new FileOutputStream(pfd.getFileDescriptor()).getChannel();
+
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                    Toast.makeText(getBaseContext(), "Backup eseguito ",
+                            Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG)
+                            .show();
+                }
+            } else if (requestCode == READ_REQUEST_CODE) {
+                try {
+                    File dataDirectory = Environment.getDataDirectory();
+                    String  currentDBPath= "//data//" + "it.spasia"
+                            + "//databases//" + Database.DATABASE_NAME;
+                    String backupDBPath  = "/" + Database.DATABASE_NAME;
+                    File backupDB = new File(dataDirectory, currentDBPath);
+                    ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(data.getData(), "r");
+
+                    FileChannel src = new FileInputStream(pfd.getFileDescriptor()).getChannel();
+                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                    setResult(RESULT_OK, new Intent());
+                    onResume();
+                    Toast.makeText(getBaseContext(), "Ripristino dei dati eseguito",
+                            Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG)
+                            .show();
+                }
+            }
+        }
     }
 
     private void importDB() {
         try {
-            File sd = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File data  = Environment.getDataDirectory();
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
 
-            if (sd.canWrite()) {
-                String  currentDBPath= "//data//" + "it.spasia"
-                        + "//databases//" + Database.DATABASE_NAME;
-                String backupDBPath  = "/" + Database.DATABASE_NAME;
-                File  backupDB= new File(data, currentDBPath);
-                File currentDB  = new File(sd, backupDBPath);
+            // Filter to only show results that can be "opened", such as
+            // a file (as opposed to a list of contacts or timezones).
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
 
-                FileChannel src = new FileInputStream(currentDB).getChannel();
-                FileChannel dst = new FileOutputStream(backupDB).getChannel();
-                dst.transferFrom(src, 0, src.size());
-                src.close();
-                dst.close();
-                setResult(RESULT_OK, new Intent());
-                onResume();
-                Toast.makeText(getBaseContext(), "Ripristino dei dati eseguito da: " + backupDB.toString(),
-                        Toast.LENGTH_LONG).show();
-            }
+            // Create a file with the requested MIME type.
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TITLE, Database.DATABASE_NAME);
+            startActivityForResult(intent, READ_REQUEST_CODE);
+
         } catch (Exception e) {
             Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG)
                     .show();
@@ -80,23 +122,17 @@ public class Settings extends PreferenceActivity {
 
     private void exportDB() {
         try {
-            File sd = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File data = Environment.getDataDirectory();
+            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
 
-            if (sd.canWrite()) {
-                String  currentDBPath= "//data//" + "it.spasia" + "//databases//" + Database.DATABASE_NAME;
-                String backupDBPath  = "/" + Database.DATABASE_NAME;
-                File currentDB = new File(data, currentDBPath);
-                File backupDB = new File(sd, backupDBPath);
+            // Filter to only show results that can be "opened", such as
+            // a file (as opposed to a list of contacts or timezones).
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
 
-                FileChannel src = new FileInputStream(currentDB).getChannel();
-                FileChannel dst = new FileOutputStream(backupDB).getChannel();
-                dst.transferFrom(src, 0, src.size());
-                src.close();
-                dst.close();
-                Toast.makeText(getBaseContext(), "Backup eseguito in: " + backupDB.toString(),
-                        Toast.LENGTH_LONG).show();
-            }
+            // Create a file with the requested MIME type.
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TITLE, Database.DATABASE_NAME);
+            startActivityForResult(intent, WRITE_REQUEST_CODE);
+
         } catch (Exception e) {
             Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG)
                     .show();
@@ -115,7 +151,7 @@ public class Settings extends PreferenceActivity {
                 alertDialogBuilder.setTitle("Attenzione");
                 alertDialogBuilder.setIcon(R.drawable.ic_icon_warning);
                 alertDialogBuilder
-                        .setMessage("Confermi il backup dei dati sulla scheda SD?")
+                        .setMessage("Confermi il backup dei dati?")
                         .setCancelable(false)
                         .setPositiveButton("Si", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -135,7 +171,7 @@ public class Settings extends PreferenceActivity {
                 alertDialogBuilderImport.setTitle("Attenzione");
                 alertDialogBuilderImport.setIcon(R.drawable.ic_icon_warning);
                 alertDialogBuilderImport
-                        .setMessage("Confermi il ripristino dei dati dalla scheda SD?")
+                        .setMessage("Confermi il ripristino dei dati?")
                         .setCancelable(false)
                         .setPositiveButton("Si", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {

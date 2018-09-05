@@ -12,6 +12,7 @@ public class Card implements Serializable {
     private String uid;
     private String password;
     private Integer timeout;
+    private String note;
 
     private String rele_1;
     private String rele_2;
@@ -33,7 +34,7 @@ public class Card implements Serializable {
     public Card() {
     }
 
-    public Card(Integer id, String name, String uid, String password, Integer timeout,
+    public Card(Integer id, String name, String uid, String password, Integer timeout, String note,
                 String rele_1, String rele_2, String rele_3, String rele_4,
                 String rele_5, String rele_6, String rele_7, String rele_8,
                 String rele_9, String rele_10, String rele_11, String rele_12,
@@ -43,6 +44,7 @@ public class Card implements Serializable {
         this.uid = uid;
         this.password = password;
         this.timeout = timeout;
+        this.note = note;
         this.rele_1 = rele_1;
         this.rele_2 = rele_2;
         this.rele_3 = rele_3;
@@ -227,6 +229,15 @@ public class Card implements Serializable {
 
     public void setRele_16(String rele_16) {
         this.rele_16 = rele_16;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public Card setNote(String note) {
+        this.note = note;
+        return this;
     }
 
     public String getReleValue(int i) {
