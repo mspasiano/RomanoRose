@@ -15,6 +15,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,8 +56,9 @@ public class CardFragment extends android.support.v4.app.Fragment {
 
     private Card card;
     private List<Switch> switches = new ArrayList<Switch>();
-    private LinearLayout linearLayoutMain;
+    private RelativeLayout relativeLayoutMain;
     private ProgressDialog progressDialog;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,15 +76,13 @@ public class CardFragment extends android.support.v4.app.Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         NestedScrollView nestedScrollView = new NestedScrollView(getActivity());
 
-        linearLayoutMain = new LinearLayout(getActivity());
-        linearLayoutMain.setOrientation(LinearLayout.VERTICAL);
-        nestedScrollView.addView(linearLayoutMain);
-
+        relativeLayoutMain = new RelativeLayout(getActivity());
+        nestedScrollView.addView(relativeLayoutMain);
 
         TableLayout tableLayout = new TableLayout(getActivity());
         tableLayout.setStretchAllColumns(true);
         tableLayout.setShrinkAllColumns(true);
-        linearLayoutMain.addView(tableLayout);
+        relativeLayoutMain.addView(tableLayout);
 
         View tableRowTimeout = inflater.inflate(R.layout.timeout, null);
         EditText editText = tableRowTimeout.findViewById(R.id.editTextTimeout);
@@ -134,7 +134,7 @@ public class CardFragment extends android.support.v4.app.Fragment {
                     public void run() {
                         if (connect()) {
                             v.setEnabled(false);
-                            linearLayoutMain.findViewById(R.id.disconnect).setEnabled(true);
+                            relativeLayoutMain.findViewById(R.id.disconnect).setEnabled(true);
                             for (Switch window : switches) {
                                 window.setEnabled(true);
                             }
@@ -184,6 +184,9 @@ public class CardFragment extends android.support.v4.app.Fragment {
                 tableRow.addView(windowSwitch);
             }
         }
+        tableLayout.addView(inflater.inflate(R.layout.tablefooternote, null));
+        TextView noteTextView = tableLayout.findViewById(R.id.note_footer);
+        noteTextView.setText(card.getNote());
         return nestedScrollView;
     }
 
@@ -211,7 +214,7 @@ public class CardFragment extends android.support.v4.app.Fragment {
         } catch (IOException e) {
             Log.e("T2u", "Socket Exception", e);
         }
-        if (((Switch) linearLayoutMain.findViewById(R.id.timeout_switch)).isChecked()) {
+        if (((Switch) relativeLayoutMain.findViewById(R.id.timeout_switch)).isChecked()) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -241,7 +244,7 @@ public class CardFragment extends android.support.v4.app.Fragment {
         for (Switch window : switches) {
             window.setChecked(true);
         }
-        if (((Switch) linearLayoutMain.findViewById(R.id.timeout_switch)).isChecked()) {
+        if (((Switch) relativeLayoutMain.findViewById(R.id.timeout_switch)).isChecked()) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -307,8 +310,8 @@ public class CardFragment extends android.support.v4.app.Fragment {
             }, 2000);
             allClose();
         }
-        linearLayoutMain.findViewById(R.id.disconnect).setEnabled(false);
-        linearLayoutMain.findViewById(R.id.connect).setEnabled(true);
+        relativeLayoutMain.findViewById(R.id.disconnect).setEnabled(false);
+        relativeLayoutMain.findViewById(R.id.connect).setEnabled(true);
         for (Switch window : switches) {
             window.setEnabled(false);
         }
@@ -394,4 +397,5 @@ public class CardFragment extends android.support.v4.app.Fragment {
         }
         return false;
     }
+
 }
