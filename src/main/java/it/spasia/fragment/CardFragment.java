@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -74,18 +75,9 @@ public class CardFragment extends android.support.v4.app.Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        NestedScrollView nestedScrollView = new NestedScrollView(getActivity());
+        relativeLayoutMain = (RelativeLayout) inflater.inflate(R.layout.card, null);
 
-        relativeLayoutMain = new RelativeLayout(getActivity());
-        nestedScrollView.addView(relativeLayoutMain);
-
-        TableLayout tableLayout = new TableLayout(getActivity());
-        tableLayout.setStretchAllColumns(true);
-        tableLayout.setShrinkAllColumns(true);
-        relativeLayoutMain.addView(tableLayout);
-
-        View tableRowTimeout = inflater.inflate(R.layout.timeout, null);
-        EditText editText = tableRowTimeout.findViewById(R.id.editTextTimeout);
+        EditText editText = relativeLayoutMain.findViewById(R.id.editTextTimeout);
         editText.setText(String.valueOf(card.getTimeout()));
         editText.setSelection(String.valueOf(card.getTimeout()).length());
         editText.addTextChangedListener(new TextWatcher() {
@@ -110,15 +102,20 @@ public class CardFragment extends android.support.v4.app.Fragment {
             }
         });
 
-        Switch aSwitch = tableRowTimeout.findViewById(R.id.timeout_switch);
+        Switch aSwitch = relativeLayoutMain.findViewById(R.id.timeout_switch);
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 editText.setEnabled(isChecked);
             }
         });
-        tableLayout.addView(tableRowTimeout);
 
+        ScrollView nestedScrollView = relativeLayoutMain.findViewById(R.id.container);
+
+        TableLayout tableLayout = new TableLayout(getActivity());
+        tableLayout.setStretchAllColumns(true);
+        tableLayout.setShrinkAllColumns(true);
+        nestedScrollView.addView(tableLayout);
 
         TableRow tableRowButtons = createTableRow(tableLayout);
         Button buttonConnect = new Button(getActivity());
@@ -184,10 +181,9 @@ public class CardFragment extends android.support.v4.app.Fragment {
                 tableRow.addView(windowSwitch);
             }
         }
-        tableLayout.addView(inflater.inflate(R.layout.tablefooternote, null));
-        TextView noteTextView = tableLayout.findViewById(R.id.note_footer);
+        TextView noteTextView = relativeLayoutMain.findViewById(R.id.note_footer);
         noteTextView.setText(card.getNote());
-        return nestedScrollView;
+        return relativeLayoutMain;
     }
 
     private TableRow createTableRow(TableLayout tableLayout) {
