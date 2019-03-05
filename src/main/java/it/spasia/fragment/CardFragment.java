@@ -138,6 +138,12 @@ public class CardFragment extends android.support.v4.app.Fragment {
                         }
                     }
                 }, 100);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        allClose();
+                    }
+                }, card.getTimeout() * 1000);
             }
         });
         tableRowButtons.addView(buttonConnect);
