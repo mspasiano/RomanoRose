@@ -30,9 +30,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="right"
-                        android:inputType="number">
-
-                        <requestFocus />
+                        android:inputType="number"
+                        android:selectAllOnFocus="true">
                     </EditText>
 
                     <TextView
@@ -60,6 +59,20 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center" >
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/button_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Avvia"
+            android:padding="16dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:enabled="false"
+            android:drawableLeft="@drawable/ic_icon_start"/>
 
         <TextView
             android:id="@+id/note_footer"
@@ -69,6 +82,7 @@
             android:paddingBottom="5dp"
             android:paddingTop="5dp"
             android:paddingLeft="5dp"/>
+        </TableLayout>
     </RelativeLayout>
 
     <!-- Scrollable Content below header and above footer -->

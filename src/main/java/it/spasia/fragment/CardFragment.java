@@ -39,7 +39,9 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import it.spasia.R;
@@ -56,7 +58,8 @@ public class CardFragment extends android.support.v4.app.Fragment {
     private Socket socket;
 
     private Card card;
-    private List<Switch> switches = new ArrayList<Switch>();
+    private Map<Integer, Switch> switches = new HashMap<>();
+    private List<Integer> switchesClicked = new ArrayList<>();
     private RelativeLayout relativeLayoutMain;
     private ProgressDialog progressDialog;
 
@@ -111,6 +114,7 @@ public class CardFragment extends android.support.v4.app.Fragment {
         });
 
         ScrollView nestedScrollView = relativeLayoutMain.findViewById(R.id.container);
+        Button buttonStart = relativeLayoutMain.findViewById(R.id.button_start);
 
         TableLayout tableLayout = new TableLayout(getActivity());
         tableLayout.setStretchAllColumns(true);
@@ -132,7 +136,8 @@ public class CardFragment extends android.support.v4.app.Fragment {
                         if (connect()) {
                             v.setEnabled(false);
                             relativeLayoutMain.findViewById(R.id.disconnect).setEnabled(true);
-                            for (Switch window : switches) {
+                            buttonStart.setEnabled(true);
+                            for (Switch window : switches.values()) {
                                 window.setEnabled(true);
                             }
                             allClose();
@@ -152,6 +157,7 @@ public class CardFragment extends android.support.v4.app.Fragment {
             @Override
             public void onClick(View v) {
                 disconnect();
+                buttonStart.setEnabled(false);
             }
         });
         tableRowButtons.addView(buttonDisconnect);
@@ -172,16 +178,28 @@ public class CardFragment extends android.support.v4.app.Fragment {
                 windowSwitch.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (windowSwitch.isChecked())
-                            open(index, windowSwitch);
-                        else
-                            close(index);
+                        switchesClicked.add(index);
                     }
                 });
-                switches.add(windowSwitch);
+                switches.put(i, windowSwitch);
                 tableRow.addView(windowSwitch);
             }
         }
+        buttonStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for(Integer index: switchesClicked) {
+                    Switch windowSwitch = switches.get(index);
+                    if (windowSwitch.isChecked())
+                        open(index, windowSwitch);
+                    else
+                        close(index);
+                }
+                Toast.makeText(v.getContext(), "Comando attivato, per " + switchesClicked.size() +" finestre.", Toast.LENGTH_SHORT).show();
+                switchesClicked.clear();
+            }
+        });
+
         TextView noteTextView = relativeLayoutMain.findViewById(R.id.note_footer);
         noteTextView.setText(card.getNote());
         return relativeLayoutMain;
@@ -238,7 +256,7 @@ public class CardFragment extends android.support.v4.app.Fragment {
         } catch (IOException e) {
             Log.e("T2u", "Socket Exception", e);
         }
-        for (Switch window : switches) {
+        for (Switch window : switches.values()) {
             window.setChecked(true);
         }
         if (((Switch) relativeLayoutMain.findViewById(R.id.timeout_switch)).isChecked()) {
@@ -282,7 +300,7 @@ public class CardFragment extends android.support.v4.app.Fragment {
         } catch (IOException e) {
             Log.e("T2u", "Socket Exception", e);
         }
-        for (Switch window : switches) {
+        for (Switch window : switches.values()) {
             window.setChecked(false);
         }
     }
@@ -309,7 +327,7 @@ public class CardFragment extends android.support.v4.app.Fragment {
         }
         relativeLayoutMain.findViewById(R.id.disconnect).setEnabled(false);
         relativeLayoutMain.findViewById(R.id.connect).setEnabled(true);
-        for (Switch window : switches) {
+        for (Switch window : switches.values()) {
             window.setEnabled(false);
         }
 
