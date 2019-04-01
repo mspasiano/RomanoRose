@@ -1,29 +1,21 @@
 package it.spasia.fragment;
 
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.os.SystemClock;
-import android.preference.EditTextPreference;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.NestedScrollView;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Switch;
@@ -43,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import it.spasia.R;
 import it.spasia.dao.DAOCard;
@@ -178,7 +171,8 @@ public class CardFragment extends android.support.v4.app.Fragment {
                 windowSwitch.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        switchesClicked.add(index);
+                        if (!switchesClicked.contains(index))
+                            switchesClicked.add(index);
                     }
                 });
                 switches.put(i, windowSwitch);
@@ -188,14 +182,18 @@ public class CardFragment extends android.support.v4.app.Fragment {
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for(Integer index: switchesClicked) {
+                for (Integer index : switchesClicked) {
                     Switch windowSwitch = switches.get(index);
                     if (windowSwitch.isChecked())
                         open(index, windowSwitch);
                     else
                         close(index);
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(300);
+                    } catch (InterruptedException e) {
+                    }
                 }
-                Toast.makeText(v.getContext(), "Comando attivato, per " + switchesClicked.size() +" finestre.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "Comando attivato, per " + switchesClicked.size() + " finestre.", Toast.LENGTH_SHORT).show();
                 switchesClicked.clear();
             }
         });
@@ -238,6 +236,34 @@ public class CardFragment extends android.support.v4.app.Fragment {
                 }
             }, card.getTimeout() * 1000);
 
+        }
+    }
+
+    private void open(List<Integer> list) {
+        byte[] abc = {(byte) 0xaa, 0X0F, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, (byte) 0xbb};
+        abc[0] = (byte) -86;
+        abc[1] = (byte) 10;
+        for (int i : list) {
+            abc[i + 2] = OPEN;
+        }
+        abc[19] = (byte) -69;
+        try {
+            OutputStream output = socket.getOutputStream();
+            output.write(abc);
+            output.flush();
+        } catch (IOException e) {
+            Log.e("T2u", "Socket Exception", e);
+        }
+        for (Switch window : switches.values()) {
+            window.setChecked(true);
+        }
+        if (((Switch) relativeLayoutMain.findViewById(R.id.timeout_switch)).isChecked()) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    allClose();
+                }
+            }, card.getTimeout() * 1000);
         }
     }
 

@@ -2,17 +2,13 @@ package it.spasia.activity;
 
 
 import android.app.ActionBar;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import java.util.List;
 
@@ -26,10 +22,10 @@ import it.spasia.model.Card;
 public class Tabbed extends FragmentActivity implements TabLayout.OnTabSelectedListener {
 
     ActionBar mActionBar;
-    private List<Card> cards;
-    private DAOCard daoCard;
     CardFragmentPagerAdapter adapter;
     ViewPager viewPager;
+    private List<Card> cards;
+    private DAOCard daoCard;
 
     public List<Card> getCards() {
         return cards;
@@ -104,7 +100,7 @@ public class Tabbed extends FragmentActivity implements TabLayout.OnTabSelectedL
     public void onTabUnselected(TabLayout.Tab tab) {
         Object o = adapter.instantiateItem(viewPager, tab.getPosition());
         if (o instanceof CardFragment) {
-            ((CardFragment)o).disconnect();
+            ((CardFragment) o).disconnect();
         }
     }
 
